@@ -1,8 +1,12 @@
 # IMPORT DISCORD.PY. ALLOWS ACCESS TO DISCORD'S API.
+from operator import pos
 import discord
 # IMPORT THE OS MODULE.
 import os
 import asyncio
+
+from discord.channel import VoiceChannel
+from discord.enums import VoiceRegion
 # IMPORT THE KEEP ALIVE TOOL
 from keep_alive import keep_alive
 # IMPORT COMMANDS FROM THE DISCORD.EXT MODULE.
@@ -148,6 +152,12 @@ async def unlock(ctx):
     await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
     await ctx.send('**An admin/moderator has unlocked this channel with `!unlock`.**')
     print(f'{ctx.author} unlocked channel {ctx.channel}.')
+@bot.command()
+async def createTextChannel(ctx, name : str, category : str = None, position : int = None, topic : str = None, nsfw : bool = False, reason : str = None):
+    await ctx.guild.create_text_channel(name = name, category = category, position = position, topic = topic, nsfw = nsfw, reason = reason)
+@bot.command()
+async def createVoiceChannel(ctx, name : str, limit : int = None, bitrate : int = None, region : VoiceRegion = "frankfurt"):
+    await ctx.guild.create_voice_channel(name = name, limit = limit, bitrate = bitrate, region = region)
 # EXECUTES THE BOT WITH THE SPECIFIED TOKEN. TOKEN HAS BEEN REMOVED AND USED JUST AS AN EXAMPLE.
 keep_alive()
 bot.run(token)
