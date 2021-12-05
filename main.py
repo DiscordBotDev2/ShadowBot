@@ -4,6 +4,7 @@ import discord
 # IMPORT THE OS MODULE.
 import os
 import asyncio
+import poke
 
 from discord.channel import VoiceChannel
 from discord.enums import VoiceRegion
@@ -11,7 +12,7 @@ from discord.enums import VoiceRegion
 from keep_alive import keep_alive
 # IMPORT COMMANDS FROM THE DISCORD.EXT MODULE.
 from discord.ext import commands
-
+blocked = ["test"]
 # GRAB THE API TOKEN FROM THE .ENV FILE.
 token = os.environ['TOKEN']
 # Change only the no_category default string
@@ -27,7 +28,7 @@ bot = commands.Bot(
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
-    await bot.change_presence(activity = discord.Game(name = "Visual Studio Code"))
+    await bot.change_presence(activity = discord.Game(name = "I AM A BOT"))
 # COMMAND $PING. INVOKES ONLY WHEN THE MESSAGE "$PING" IS SEND IN THE DISCORD SERVER.
 # ALTERNATIVELY @BOT.COMMAND(NAME="PING") CAN BE USED IF ANOTHER FUNCTION NAME IS DESIRED.
 @bot.command(
@@ -103,6 +104,7 @@ async def c(ctx):
   help = "Gives role!",
   brief = "Gives role!"
 )
+@commands.has_permissions(manage_roles = True)
 async def selfAdmin(ctx):
   role = ctx.guild.get_role(916009243407163532)
   user = ctx.message.author
@@ -152,12 +154,31 @@ async def unlock(ctx):
     await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
     await ctx.send('**An admin/moderator has unlocked this channel with `!unlock`.**')
     print(f'{ctx.author} unlocked channel {ctx.channel}.')
-@bot.command()
-async def createTextChannel(ctx, name : str, category : str = None, position : int = None, topic : str = None, nsfw : bool = False, reason : str = None):
-    await ctx.guild.create_text_channel(name = name, category = category, position = position, topic = topic, nsfw = nsfw, reason = reason)
-@bot.command()
-async def createVoiceChannel(ctx, name : str, limit : int = None, bitrate : int = None, region : VoiceRegion = "frankfurt"):
-    await ctx.guild.create_voice_channel(name = name, limit = limit, bitrate = bitrate, region = region)
+#@bot.command()
+#async def createTextChannel(ctx, name : str, category : str = None):
+#    await ctx.guild.create_text_channel(name = name, category = category)
+#@bot.command()
+#async def createVoiceChannel(ctx, name : str, limit : int = None, bitrate : int = None, region : VoiceRegion = "frankfurt"):
+#    await ctx.guild.create_voice_channel(name = name, limit = limit, bitrate = bitrate, region = region)
+
 # EXECUTES THE BOT WITH THE SPECIFIED TOKEN. TOKEN HAS BEEN REMOVED AND USED JUST AS AN EXAMPLE.
+@bot.command()
+async def pokemon(ctx, endpoint, info : str = None):
+  data = poke.get(pokemon)
+  dataList = []
+  print(data)
+  author = ctx.message.author
+  await author.create_dm()
+  if len(data) > 4000:
+    for i in range(1,math.ceil(len(data)):
+      m = math.ceil(len(data) / 4000)
+      try:
+        datalist[m] = str(dataList + data[i])
+      except OutOfBoundsError:
+        break
+  await author.dm_channel.send(data)
+@bot.command()
+async def lol(ctx):
+  await ctx.channel.send("hahahahahahahahahahha")
 keep_alive()
 bot.run(token)
