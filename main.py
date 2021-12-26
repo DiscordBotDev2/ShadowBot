@@ -5,7 +5,8 @@ import discord
 import os
 import asyncio
 import poke
-
+from replit import db
+keys = db.keys()
 from discord.channel import VoiceChannel
 from discord.enums import VoiceRegion
 # IMPORT THE KEEP ALIVE TOOL
@@ -160,25 +161,14 @@ async def unlock(ctx):
 #@bot.command()
 #async def createVoiceChannel(ctx, name : str, limit : int = None, bitrate : int = None, region : VoiceRegion = "frankfurt"):
 #    await ctx.guild.create_voice_channel(name = name, limit = limit, bitrate = bitrate, region = region)
-
 # EXECUTES THE BOT WITH THE SPECIFIED TOKEN. TOKEN HAS BEEN REMOVED AND USED JUST AS AN EXAMPLE.
 @bot.command()
-async def pokemon(ctx, endpoint, info : str = None):
-  data = poke.get(pokemon)
-  dataList = []
-  print(data)
-  author = ctx.message.author
-  await author.create_dm()
-  if len(data) > 4000:
-    for i in range(1,math.ceil(len(data)):
-      m = math.ceil(len(data) / 4000)
-      try:
-        datalist[m] = str(dataList + data[i])
-      except OutOfBoundsError:
-        break
-  await author.dm_channel.send(data)
-@bot.command()
-async def lol(ctx):
-  await ctx.channel.send("hahahahahahahahahahha")
+async def db(ctx, command, key, *, value = None ):
+  commands = ["add", "get"]
+  if command in commands:
+    if command == "add":
+      db[key] = value 
+    if command == "get":
+      db[key]
 keep_alive()
 bot.run(token)
