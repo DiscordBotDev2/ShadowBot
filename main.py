@@ -199,7 +199,6 @@ async def remove(ctx, key : str):
 @db.command()
 async def clear(ctx):
     db_clear()
-@db.command()
 @bot.command()
 @commands.has_permissions(manage_roles=True)
 async def remove(ctx, user: discord.Member):
