@@ -4,7 +4,8 @@ Features :
 - In-built database (using replit)
 - Moderation commands 
 - Channel Locking <br>
-Planned features
+
+Planned features :
 - Giveaways
 - Automatic moderation
 - Polls
