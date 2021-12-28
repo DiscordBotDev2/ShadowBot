@@ -182,29 +182,24 @@ async def unlock(ctx):
     await ctx.send(
         '**An admin/moderator has unlocked this channel with `!unlock`.**')
     print(f'{ctx.author} unlocked channel {ctx.channel}.')
-
-
-#@bot.command()
-#async def createTextChannel(ctx, name : str, category : str = None):
-#    await ctx.guild.create_text_channel(name = name, category = category)
-#@bot.command()
-#async def createVoiceChannel(ctx, name : str, limit : int = None, bitrate : int = None, region : VoiceRegion = "frankfurt"):
-#    await ctx.guild.create_voice_channel(name = name, limit = limit, bitrate = bitrate, region = region)
-# EXECUTES THE BOT WITH THE SPECIFIED TOKEN. TOKEN HAS BEEN REMOVED AND USED JUST AS AN EXAMPLE.
-@bot.command()
-async def db(ctx, command, key : str = None, *, value=None):
-    commands = ["add", "get", "clear", "remove", "edit"]
-    if command in commands:
-        if command == "add" or "edit":
-            replit.db[key] = value
-        if command == "get":
-            await ctx.channel.send(str(replit.db[key]))
-        if command == "remove":
-            del replit.db[key]
-        if command == "clear":
-          db_clear()
-
-
+@bot.group()
+async def db(ctx):
+    if ctx.invoked_subcommand is None:
+        await ctx.send('Invalid database command passed...')
+                   
+@db.command()  
+async def add(ctx, key : str, value: str):
+    replit.db[key] = value
+@db.command()
+async def get(ctx, key : str):
+     await ctx.channel.send(str(replit.db[key]))
+@db.command()
+async def remove(ctx, key : str):
+    del replit.db[key]
+@db.command()
+async def clear(ctx):
+    db_clear()
+@db.command()
 @bot.command()
 @commands.has_permissions(manage_roles=True)
 async def remove(ctx, user: discord.Member):
@@ -238,9 +233,9 @@ async def crash(ctx, reason: str):
     global verified
     if verified == True:
         await ctx.channel.send("Crashing the bot for {}".format(reason))
-        print("test")
+        print("Crashed. Printing reason...")
+        print(reason)
         await sys.exit()
-        print("yes")
     else:
       print(verified)
 
@@ -254,6 +249,7 @@ async def refresh(ctx):
       verified = True
     else:
       verified = False
+
 
 keep_alive()
 bot.run(token)
