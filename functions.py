@@ -5,4 +5,8 @@ def db_clear():
   print(keys)
   for i in keys:
     del replit.db[i]
-db_clear()
+def unbackslash(data):
+  betterData = []
+  for item in data:
+    betterData.append(item.strip())
+  return betterData

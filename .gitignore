@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 id.txt
-
+users/
 
 # C extensions
 *.so

@@ -2,25 +2,28 @@
 import discord
 # IMPORT THE OS MODULE.
 import os
+import subprocess
 import sys
 import asyncio
 import random
-from functions import *
+import functions
 import replit
-Id = random.randint(0,1000000000000)
+
+Id = random.randint(0, 1000000000000)
 print(str(Id) + " Main.py")
 with open("id.txt", "w") as file:
-  file.write(str(Id))
-  file.close()
+    file.write(str(Id))
+    file.close()
 verified = False
-
+msg = ""
+giveaways = []
 keys = replit.db.keys()
 # IMPORT THE KEEP ALIVE TOOL
 from keep_alive import keep_alive
 # IMPORT COMMANDS FROM THE DISCORD.EXT MODULE.
 from discord.ext import commands
 
-blocked = ["test"]
+blocked = []
 # GRAB THE API TOKEN FROM THE .ENV FILE.
 token = os.environ['TOKEN']
 # Change only the no_category default string
@@ -34,7 +37,15 @@ bot = commands.Bot(command_prefix="!", help_command=help_command)
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     await bot.change_presence(activity=discord.Game(name="I AM A BOT"))
-    
+
+
+@bot.event
+async def on_message(message):
+    for i in range(0, len(blocked)):
+        if blocked[i] in message.content:
+            await message.delete()
+    await bot.process_commands(message)
+
 
 # COMMAND $PING. INVOKES ONLY WHEN THE MESSAGE "$PING" IS SEND IN THE DISCORD SERVER.
 # ALTERNATIVELY @BOT.COMMAND(NAME="PING") CAN BE USED IF ANOTHER FUNCTION NAME IS DESIRED.
@@ -182,23 +193,34 @@ async def unlock(ctx):
     await ctx.send(
         '**An admin/moderator has unlocked this channel with `!unlock`.**')
     print(f'{ctx.author} unlocked channel {ctx.channel}.')
+
+
 @bot.group()
 async def db(ctx):
     if ctx.invoked_subcommand is None:
         await ctx.send('Invalid database command passed...')
-                   
-@db.command()  
-async def add(ctx, key : str, value: str):
+
+
+@db.command()
+async def add(ctx, key: str, value: str):
     replit.db[key] = value
+
+
 @db.command()
-async def get(ctx, key : str):
-     await ctx.channel.send(str(replit.db[key]))
+async def get(ctx, key: str):
+    await ctx.channel.send(str(replit.db[key]))
+
+
 @db.command()
-async def remove(ctx, key : str):
+async def remove(ctx, key: str):
     del replit.db[key]
+
+
 @db.command()
 async def clear(ctx):
-    db_clear()
+    functions.db_clear()
+
+
 @bot.command()
 @commands.has_permissions(manage_roles=True)
 async def remove(ctx, user: discord.Member):
@@ -236,7 +258,7 @@ async def crash(ctx, reason: str):
         print(reason)
         await sys.exit()
     else:
-      print(verified)
+        print(verified)
 
 
 @bot.command()
@@ -245,9 +267,86 @@ async def refresh(ctx):
     var = replit.db[str(Id)]
     print(var)
     if var == "True" or True:
-      verified = True
+        verified = True
     else:
-      verified = False
+        verified = False
+
+
+@bot.command()
+async def slowmode(ctx, delay: int, *, channel: str = None):
+    if channel == None:
+        await ctx.channel.edit(slowmode_delay=delay)
+    else:
+        channel = discord.utils.get(ctx.guild.text_channels, name=channel)
+        await channel.edit(slowmode_delay=delay)
+
+
+@bot.group()
+async def giveaway(ctx):
+    if ctx.invoked_subcommand is None:
+        await ctx.send('Invalid giveaway command passed...')
+
+
+@giveaway.command()
+async def start(ctx, *, name: str):
+    global msg
+    msg = await ctx.channel.send(name)
+    await msg.add_reaction("🔑")
+
+
+@giveaway.command()
+async def end(ctx):
+    global msg
+    users = msg.reactions[0].users().flatten()
+    await ctx.channel.send(random.choice(users))
+
+
+@bot.group()
+async def bash(ctx):
+    if ctx.invoked_subcommand == None:
+        await ctx.send("Invalid shell command!")
+
+
+@bash.command()
+async def make_shell(ctx):
+    await ctx.send("Initializing a shell...")
+    if verified == True:
+        subprocess.run(["mkdir", "./users/" + ctx.message.author.name])
+    else:
+        await ctx.send("You dont have the correct perms!")
+
+
+@bash.group(name="$")
+async def run(ctx):
+    if ctx.invoked_subcommand == None:
+        await ctx.send("Invalid function. |!help bash $| for more")
+    else:
+        with open("./users/" + ctx.message.author.name + "/history.bash",
+                  "a") as f:
+            f.write(ctx.invoked_subcommand.name + "\n")
+            f.close()
+
+
+@run.command()
+async def test(ctx):
+    await ctx.send("Test complete!")
+
+
+@run.command()
+async def history(ctx):
+    with open("./users/" + ctx.message.author.name + "/history.bash",
+              "r") as f:
+        data = f.readlines()
+        await ctx.send(functions.unbackslash(data))
+        f.close()
+
+
+@bot.command()
+async def unverify(ctx):
+    global Id
+    verified = False
+    replit.db[Id] = False
+    Id = "403 - Forbidden"
 
 
 keep_alive()
