@@ -8,7 +8,19 @@ import asyncio
 import random
 import functions
 import replit
-
+logging = False
+# TODO #
+"""
+- Error Handling!
+- Add better responses to old commands
+- Fix SLOWMODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+"""
+# Maybe implement (In order of difficulty; low to high) #
+"""
+- Rewrite in a active library (slash commands support)?
+- Make a website?
+- Web dashboard?
+"""
 Id = random.randint(0, 1000000000000)
 print(str(Id) + " Main.py")
 with open("id.txt", "w") as file:
@@ -16,7 +28,12 @@ with open("id.txt", "w") as file:
     file.close()
 verified = False
 msg = ""
+teams = []
 giveaways = []
+log = []
+cat = None
+count = 0
+category = ""
 keys = replit.db.keys()
 # IMPORT THE KEEP ALIVE TOOL
 from keep_alive import keep_alive
@@ -37,7 +54,6 @@ bot = commands.Bot(command_prefix="!", help_command=help_command)
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     await bot.change_presence(activity=discord.Game(name="I AM A BOT"))
-
 
 @bot.event
 async def on_message(message):
@@ -229,7 +245,12 @@ async def remove(ctx, user: discord.Member):
 
 @bot.command()
 async def info(ctx):
-    await ctx.channel.send("Bot creator: @stinkymineman#0664")
+    creator = discord.utils.get(ctx.guild.members, name = "stinkymineman#0664")
+    print(creator)
+    if creator != None:
+      await ctx.send(creator.mention)
+    else:
+      await ctx.channel.send("Bot creator: @stinkymineman#0664")
 
 
 @bot.command()
@@ -316,7 +337,7 @@ async def make_shell(ctx):
         await ctx.send("You dont have the correct perms!")
 
 
-@bash.group(name="$")
+@bash.group(aliases = ["$"])
 async def run(ctx):
     if ctx.invoked_subcommand == None:
         await ctx.send("Invalid function. |!help bash $| for more")
@@ -344,10 +365,59 @@ async def history(ctx):
 @bot.command()
 async def unverify(ctx):
     global Id
+    global verified
     verified = False
     replit.db[Id] = False
     Id = "403 - Forbidden"
 
+@bot.group(aliases = ["tm"])
+async def tournament(ctx):
+  if ctx.invoked_subcommand == None:
+    await ctx.send("Wrong tournament command!")
 
+@tournament.command()
+async def start(ctx, teams_count : int, members_in_team : int, *, game : str):
+  global cat
+  global teams
+  if cat != None:
+    await ctx.send("There is already a tournament running!")
+  else:
+    cat = await ctx.guild.create_category("Tournament : " + game)
+    for i in range(1,teams_count + 1):
+      teams.append(await ctx.guild.create_voice_channel("team_" + str(i), user_limit = members_in_team + 2, category = cat))
+
+@tournament.command(aliases = ["end"])
+async def stop(ctx):
+  await cat.delete()
+  for i in range(0,len(teams)):
+    await teams[i].delete()
+
+@bot.group(invoke_without_subcommand = True)
+async def automod(ctx):
+  await ctx.send("Invalid subcommand!")
+
+@automod.command()
+async def add(ctx, term : str):
+  blocked.append(term)
+@automod.command()
+async def remove(ctx, term : str):
+  try:
+    blocked.remove(term)
+  except ValueError:
+    ctx.send("Term does not exist!")
+
+@bot.command()
+async def warn(ctx, user : discord.Member):
+  if user == ctx.guild.owner:
+    if not os.path.isdir("./users/" + user.name):
+      subprocess.run(["mkdir", "./users/" + user.name])
+    if os.path.isfile("./users/" + user.name + "/warn"):
+      await ctx.send("The users has already been warned, banning instead...")
+      await user.ban()
+    else:
+      subprocess.run(["touch", "./users/" + user.name + "/warn"])
+      await ctx.send("The user has been warned!")
+  else:
+    await ctx.send("really.")
 keep_alive()
 bot.run(token)

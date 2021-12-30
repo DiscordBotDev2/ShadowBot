@@ -10,3 +10,19 @@ def unbackslash(data):
   for item in data:
     betterData.append(item.strip())
   return betterData
+def manipulate(file, mode, data):
+  try:
+    with open(file, mode) as f:
+      if mode == "w":
+        f.write(data)
+        f.close()
+      if mode == "r":
+        read = f.readlines()
+        f.close
+        return read
+  except:
+    raise 
+
+def transform(ls, rules):
+  pass
+
